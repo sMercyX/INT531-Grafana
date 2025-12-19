@@ -42,6 +42,15 @@ receivers:
           **Fired at**: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
           {{ if .EndsAt }}**Resolved at**: {{ .EndsAt.Format "2006-01-02 15:04:05" }}{{ end }}
           {{ end }}
+          
+          **Alerts:**
+          {{ range .Alerts }}
+          - {{ .Annotations.summary }}
+          {{ end }}
+
+          {{ if eq .GroupLabels.severity "critical" }}
+          @infrastructure
+          {{ end }}
 
 # Inhibition rules - prevent alert spam
 inhibit_rules:

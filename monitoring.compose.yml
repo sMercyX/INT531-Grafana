@@ -30,7 +30,7 @@ services:
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
     ports:
-      - "9990:9090"
+      - "9090:9090"
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
@@ -38,7 +38,6 @@ services:
       - prometheus_data:/prometheus
     networks:
       - monitoring
-      - app-network
     depends_on:
       - alertmanager
 
@@ -48,7 +47,7 @@ services:
     container_name: alertmanager
     restart: unless-stopped
     ports:
-      - "9094:9093"
+      - "9093:9093"
     volumes:
       - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
       - alertmanager_data:/alertmanager
@@ -58,42 +57,9 @@ services:
     networks:
       - monitoring
 
-  # MySQL Exporter - Database Metrics
-  mysqld-exporter:
-    image: prom/mysqld-exporter:v0.14.0
-    container_name: mysqld-exporter
-    restart: unless-stopped
-    environment:
-      - DATA_SOURCE_NAME=root:rootpassword@(database:3306)/
-    ports:
-      - "9104:9104"
-    networks:
-      - monitoring
-      - app-network
-    depends_on:
-      - prometheus
-
-  # Nginx Exporter - Frontend/Proxy Metrics
-  nginx-exporter:
-    image: nginx/nginx-prometheus-exporter:latest
-    container_name: nginx-exporter
-    restart: unless-stopped
-    command:
-      - '-nginx.scrape-uri=http://reverse-proxy:80/stub_status'
-    ports:
-      - "9113:9113"
-    networks:
-      - monitoring
-      - app-network
-    depends_on:
-      - prometheus
-
 networks:
   monitoring:
     driver: bridge
-  app-network:
-    name: int531-monitoring-tools_app-network
-    external: true
 
 volumes:
   grafana_data:

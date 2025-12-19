@@ -1312,8 +1312,8 @@
   },
   "timepicker": {},
   "timezone": "",
-  "title": "INT531 - Four Golden Signals Dashboard",
-  "uid": "int531-golden-signals",
+  "title": "API Dashboard",
+  "uid": "api-dashboard",
   "version": 1,
   "weekStart": ""
 }

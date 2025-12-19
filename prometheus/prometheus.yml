@@ -26,11 +26,9 @@ scrape_configs:
 
   # Node Exporter - System Metrics (CPU, RAM, Disk, Network)
   - job_name: 'node-exporter'
-    static_configs:
-      - targets:
-          - '10.13.104.61:9100'
-        labels:
-          service: 'host-system'
+    file_sd_configs:
+      - files:
+          - 'targets/*.json'
 
   # Backend Service - Application Metrics
   - job_name: 'backend'

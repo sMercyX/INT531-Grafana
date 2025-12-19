@@ -34,6 +34,7 @@ services:
     volumes:
       - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
       - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml
+      - ./prometheus/targets:/etc/prometheus/targets
       - prometheus_data:/prometheus
     networks:
       - monitoring

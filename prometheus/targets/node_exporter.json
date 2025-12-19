@@ -1,0 +1,8 @@
+[
+  {
+    "targets": ["10.13.104.61:9100"],
+    "labels": {
+      "service": "host-system"
+    }
+  }
+]

@@ -1,0 +1,18 @@
+groups:
+  - name: db_slo_alerts
+    interval: 30s
+    rules:
+      # ===== Database Connection Issues =====
+      - alert: DatabaseDown
+        expr: up{job="mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+        annotations:
+          summary: "MySQL database is unreachable"
+          description: |
+            Alert Name: DatabaseDown
+            Expression (SLI): MySQL exporter cannot connect (up == 0)
+            Duration: Alert fires after condition persists for 1 minute
+            Details: The MySQL database is not accessible, which will cause application failures.

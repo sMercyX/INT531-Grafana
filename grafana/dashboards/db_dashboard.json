@@ -182,7 +182,19 @@
       ],
       "fieldConfig": { "defaults": { "unit": "bytes" } }
     },
-
+    {
+      "type": "stat",
+      "title": "Errors (Deadlocks / sec)",
+      "gridPos": { "x": 18, "y": 12, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(pg_stat_database_deadlocks{job=\"$job\", instance=~\"$instance\", datname=~\"$db\"}[$rate_interval]))"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
     {
       "type": "text",
       "title": "If NO DATA: check metric names from exporter",

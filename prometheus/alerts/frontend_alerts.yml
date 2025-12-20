@@ -1,0 +1,58 @@
+groups:
+  - name: frontend_slo_alerts
+    interval: 30s
+    rules:
+      # ===== Frontend Service Down Alert =====
+      - alert: FrontendServiceDown
+        expr: up{job="frontend_service"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: frontend
+        annotations:
+          summary: "Frontend service is down"
+          description: |
+            Alert Name: FrontendServiceDown
+            Expression (SLI): Service health check failed (up == 0)
+            Duration: Alert fires after condition persists for 1 minute
+            Details: The frontend service is not responding to health checks.
+
+      # ===== Frontend High Error Rate =====
+      - alert: FrontendHighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="frontend_service", status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="frontend_service"}[5m]))
+          ) > 0.01
+        for: 2m
+        labels:
+          severity: critical
+          service: frontend
+          signal: errors
+        annotations:
+          summary: "High error rate detected on frontend"
+          description: |
+            Alert Name: FrontendHighErrorRate
+            Expression (SLI): 5xx error rate is {{ $value | humanizePercentage }} (threshold: 1%)
+            Duration: Alert fires after condition persists for 2 minutes
+            Details: The frontend service is experiencing elevated 5xx error rates.
+
+      # ===== Frontend High Latency =====
+      - alert: FrontendHighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            sum(rate(http_request_duration_seconds_bucket{job="frontend_service"}[5m])) by (le)
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: warning
+          service: frontend
+          signal: latency
+        annotations:
+          summary: "High latency detected on frontend"
+          description: |
+            Alert Name: FrontendHighLatency
+            Expression (SLI): P95 latency is {{ $value }}s (threshold: 0.5s)
+            Duration: Alert fires after condition persists for 3 minutes
+            Details: The 95th percentile response time for the frontend has exceeded 0.5s.

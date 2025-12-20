@@ -3,15 +3,14 @@ groups:
     interval: 30s
     rules:
 
-      # ===== Errors =====
       - alert: HighErrorRate
         expr: |
           (
-            sum(rate(app_http_requests_total{job="backend_service", status=~"5.."}[5m]))
+            sum(rate(app_http_requests_total{job="backend_service",status="5xx"}[1m]))
             /
-            sum(rate(app_http_requests_total{job="backend_service"}[5m]))
+            sum(rate(app_http_requests_total{job="backend_service"}[1m]))
           ) > 0.01
-        for: 2m
+        for: 30s
         labels:
           severity: critical
           service: backend
@@ -19,21 +18,18 @@ groups:
         annotations:
           summary: "Backend high error rate detected"
           description: |
-            5xx error rate exceeded SLO threshold (1%).
-            This indicates backend service failure or dependency issues.
+            5xx error rate exceeded 1% (1m window).
           runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
-
-      # ===== Latency =====
       - alert: HighLatency
         expr: |
           histogram_quantile(
             0.95,
             sum by (le) (
-              rate(app_http_request_duration_seconds_bucket{job="backend_service"}[1m])
+              rate(app_http_request_duration_seconds_bucket{job="backend_service"}[30s])
             )
-          ) > 0.5
-        for: 30s
+          ) > 0.005
+        for: 10s
         labels:
           severity: warning
           service: backend
@@ -41,16 +37,13 @@ groups:
         annotations:
           summary: "Backend high latency detected (P95)"
           description: |
-            P95 backend latency exceeded 500ms.
-            User experience may be degraded.
+            P95 backend latency exceeded 5ms (demo threshold).
           runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
-
-      # ===== Traffic =====
       - alert: LowTraffic
         expr: |
-          sum(rate(app_http_requests_total{job="backend_service"}[5m])) < 0.01
-        for: 10m
+          sum(rate(app_http_requests_total{job="backend_service"}[1m])) < 0.01
+        for: 2m
         labels:
           severity: info
           service: backend
@@ -58,15 +51,12 @@ groups:
         annotations:
           summary: "Backend traffic unusually low"
           description: |
-            Request rate is below normal baseline.
-            This may indicate upstream connectivity issues.
+            Request rate is below baseline.
           runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
-
-      # ===== Availability =====
       - alert: ServiceDown
         expr: up{job="backend_service"} == 0
-        for: 1m
+        for: 30s
         labels:
           severity: critical
           service: backend
@@ -74,6 +64,5 @@ groups:
         annotations:
           summary: "Backend service is down"
           description: |
-            Backend service is not responding to health checks.
-            Immediate action is required.
+            Backend service is not responding to scrape.
           runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md

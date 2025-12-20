@@ -13,130 +13,182 @@
 
 ---
 
-## Availability
+## 1. Availability
 
-### Alert: ServiceDown
+### Alert Name & Description
+**Alert:** `ServiceDown`  
+**Description:** Prometheus cannot scrape the backend service (`up == 0`).
 
-**Severity:** Critical  
-**Meaning:** Prometheus cannot scrape the backend service (`up == 0`). The service is unavailable.
+### Symptoms
+- API endpoints unreachable
+- Increased frontend errors
+- No backend metrics available
 
-#### Immediate Checks
-- Check Prometheus Targets page
-- Verify backend pod / container / VM status
-- Check recent deployments or crashes
-- Validate network and ingress configuration
-
-#### Diagnosis
+### Possible Causes
 - Application crash or panic
 - Host failure
 - Misconfigured health check
 - Network or firewall issue
 
-#### Mitigation
+### Troubleshooting Steps
+1. Check Prometheus targets page
+2. Verify backend container or VM status
+3. Review recent deployments
+4. Validate network and ingress configuration
+
+### Mitigation / Resolution Steps
 - Restart backend service
 - Roll back recent deployment
 - Restore network connectivity
 
-#### Escalation
-- Page backend on-call immediately
-- Escalate to infrastructure team if host-related
+### Escalation Path
+- Backend On-call
+- Infrastructure Team (if host-related)
+
+### Rollback Instructions
+- Re-deploy previous stable backend version
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Traffic
+## 2. Traffic
 
-### Alert: LowTraffic
+### Alert Name & Description
+**Alert:** `LowTraffic`  
+**Description:** Backend receives unusually low request volume.
 
-**Severity:** Info (Contextual)  
-**Meaning:** Backend is receiving unusually low request volume.
+### Symptoms
+- Drop in request rate
+- Reduced frontend activity
 
-> ⚠️ Not critical by itself, but relevant during incidents.
+### Possible Causes
+- Upstream routing issues
+- Frontend outage
+- Load balancer misconfiguration
+
+### Mitigation / Resolution Steps
+- Verify upstream components
+- Restore routing
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Latency
+## 3. Latency
 
-### Alert: HighLatency
+### Alert Name & Description
+**Alert:** `HighLatency`  
+**Description:** P95 backend latency exceeds SLO threshold.
 
-**Severity:** Warning → Critical if persistent  
-**Meaning:** P95 backend latency exceeds SLO threshold.
+### Symptoms
+- Slow API responses
+- Increased frontend latency
 
-#### Immediate Checks
-- Inspect latency (p50 / p95 / p99)
-- Correlate with traffic and error rate
-- Identify slow endpoints
-
-#### Diagnosis
+### Possible Causes
 - Downstream dependency slowness
 - CPU or memory saturation
 - Inefficient queries or logic
 
-#### Mitigation
+### Troubleshooting Steps
+1. Inspect latency percentiles
+2. Identify slow endpoints
+3. Check dependency health
+
+### Mitigation / Resolution Steps
 - Scale backend replicas
 - Restart unhealthy instances
-- Reduce load if necessary
+- Reduce load if required
 
-#### Escalation
-- Page on-call if latency continues to increase
+### Escalation Path
+- Backend On-call
+
+### Rollback Instructions
+- Roll back performance-impacting changes
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Errors
+## 4. Errors
 
-### Alert: HighErrorRate
+### Alert Name & Description
+**Alert:** `HighErrorRate`  
+**Description:** Backend 5xx error rate exceeds SLO.
 
-**Severity:** Critical  
-**Meaning:** 5xx error rate exceeds SLO (1%).
+### Symptoms
+- API failures
+- Frontend error pages
 
-#### Immediate Checks
-- Check error rate dashboard
-- Inspect backend logs
-- Check database and downstream services
-
-#### Diagnosis
+### Possible Causes
 - Application bug
 - Dependency outage
 - Invalid configuration
 
-#### Mitigation
+### Mitigation / Resolution Steps
 - Roll back deployment
 - Restart service
 - Disable failing features
 
-#### Escalation
-- Page backend team immediately
+### Escalation Path
+- Backend Team (Immediate)
+
+### Rollback Instructions
+- Restore last stable backend version
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Error Budget
+## 5. Error Budget
 
-### Alert: BackendErrorBudgetBurn
+### Alert Name & Description
+**Alert:** `BackendErrorBudgetBurn`  
+**Description:** Error budget is being consumed rapidly.
 
-**Severity:** Critical  
-**Meaning:** Error budget is burning rapidly.
-
-#### Mitigation
+### Mitigation / Resolution Steps
 - Freeze deployments
-- Focus on reliability over new changes
+- Focus on reliability
 - Reduce load
 
+### Escalation Path
+- SRE / Engineering Lead
+
+### Rollback Instructions
+- Roll back recent changes
+
+### Post-mortem Link
+- TBD / To be documented
+
 ---
 
-## Saturation
+## 6. Saturation
 
-### Alert: BackendHighSaturation
+### Alert Name & Description
+**Alert:** `BackendHighSaturation`  
+**Description:** Backend resources are saturated.
 
-**Severity:** Critical  
-**Meaning:** Backend resources are saturated.
-
-#### Mitigation
+### Mitigation / Resolution Steps
 - Scale horizontally
 - Increase resource limits
 - Apply rate limiting
 
+### Escalation Path
+- Backend / Platform Team
+
+### Rollback Instructions
+- Revert load-increasing changes
+
+### Post-mortem Link
+- TBD / To be documented
+
 ---
 
-## General Response Guidelines
+## 7. General Response Guidelines
 - Acknowledge critical alerts immediately
 - Prefer rollback over risky fixes
-- Capture metrics and timeline for postmortem
+- Capture metrics and timeline for post-mortem

@@ -2,7 +2,8 @@ groups:
   - name: backend_slo_alerts
     interval: 30s
     rules:
-      # ===== High Error Rate Alert (SLO: Error Rate < 1%) =====
+
+      # ===== Errors =====
       - alert: HighErrorRate
         expr: |
           (
@@ -16,17 +17,17 @@ groups:
           service: backend
           signal: errors
         annotations:
-          summary: "High error rate detected on {{ $labels.service }}"
+          summary: "Backend high error rate detected"
           description: |
-            Alert Name: HighErrorRate
-            Expression (SLI): Error rate is {{ $value | humanizePercentage }} (threshold: 1%)
-            Duration: Alert fires after condition persists for 2 minutes
-            Details: The backend service is experiencing elevated 5xx error rates, indicating potential service degradation or failures.
+            5xx error rate exceeded SLO threshold (1%).
+            This indicates backend service failure or dependency issues.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
 
-      # ===== High Latency Alert (SLO: P95 latency < 500ms) =====
+
+      # ===== Latency =====
       - alert: HighLatency
         expr: |
-          histogram_quantile(0.95, 
+          histogram_quantile(0.95,
             sum(rate(ktor_http_server_requests_seconds_bucket[5m])) by (le)
           ) > 0.5
         for: 3m
@@ -35,14 +36,14 @@ groups:
           service: backend
           signal: latency
         annotations:
-          summary: "High latency detected on {{ $labels.service }}"
+          summary: "Backend high latency detected (P95)"
           description: |
-            Alert Name: HighLatency
-            Expression (SLI): P95 latency is {{ $value }}s (threshold: 0.5s)
-            Duration: Alert fires after condition persists for 3 minutes
-            Details: The 95th percentile response time has exceeded acceptable thresholds, users may experience slow responses.
+            P95 backend latency exceeded 500ms.
+            User experience may be degraded.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
 
-      # ===== Low Request Traffic (Traffic Signal) =====
+
+      # ===== Traffic =====
       - alert: LowTraffic
         expr: |
           sum(rate(ktor_http_server_requests_seconds_count[5m])) < 0.01
@@ -52,24 +53,24 @@ groups:
           service: backend
           signal: traffic
         annotations:
-          summary: "Low traffic detected on {{ $labels.service }}"
+          summary: "Backend traffic unusually low"
           description: |
-            Alert Name: LowTraffic
-            Expression (SLI): Request rate is {{ $value }} req/s (threshold: < 0.01 req/s)
-            Duration: Alert fires after condition persists for 10 minutes
-            Details: The backend service is receiving unusually low traffic, which may indicate connectivity issues or upstream problems.
+            Request rate is below normal baseline.
+            This may indicate upstream connectivity issues.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
 
-      # ===== Service Down Alert =====
+
+      # ===== Availability =====
       - alert: ServiceDown
         expr: up{job="backend"} == 0
         for: 1m
         labels:
           severity: critical
           service: backend
+          signal: availability
         annotations:
           summary: "Backend service is down"
           description: |
-            Alert Name: ServiceDown
-            Expression (SLI): Service health check failed (up == 0)
-            Duration: Alert fires after condition persists for 1 minute
-            Details: The backend service is not responding to health checks and appears to be completely unavailable.
+            Backend service is not responding to health checks.
+            Immediate action is required.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md

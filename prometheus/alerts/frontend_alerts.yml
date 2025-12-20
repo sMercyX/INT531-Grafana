@@ -2,22 +2,27 @@ groups:
   - name: frontend_slo_alerts
     interval: 30s
     rules:
-      # ===== Frontend Service Down Alert =====
+      # =========================================================
+      # Availability
+      # =========================================================
       - alert: FrontendServiceDown
         expr: up{job="frontend_service"} == 0
         for: 1m
         labels:
           severity: critical
           service: frontend
+          signal: availability
         annotations:
           summary: "Frontend service is down"
           description: |
-            Alert Name: FrontendServiceDown
-            Expression (SLI): Service health check failed (up == 0)
-            Duration: Alert fires after condition persists for 1 minute
-            Details: The frontend service is not responding to health checks.
+            Frontend service is not responding to health checks (up == 0).
+            Users may be unable to access the application.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
 
-      # ===== Frontend High Error Rate =====
+
+      # =========================================================
+      # Errors
+      # =========================================================
       - alert: FrontendHighErrorRate
         expr: |
           (
@@ -31,17 +36,19 @@ groups:
           service: frontend
           signal: errors
         annotations:
-          summary: "High error rate detected on frontend"
+          summary: "Frontend high error rate detected"
           description: |
-            Alert Name: FrontendHighErrorRate
-            Expression (SLI): 5xx error rate is {{ $value | humanizePercentage }} (threshold: 1%)
-            Duration: Alert fires after condition persists for 2 minutes
-            Details: The frontend service is experiencing elevated 5xx error rates.
+            Frontend 5xx error rate exceeded SLO threshold (1%) for 2 minutes.
+            This may be caused by backend API failures or a broken frontend deployment.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
 
-      # ===== Frontend High Latency =====
+
+      # =========================================================
+      # Latency
+      # =========================================================
       - alert: FrontendHighLatency
         expr: |
-          histogram_quantile(0.95, 
+          histogram_quantile(0.95,
             sum(rate(http_request_duration_seconds_bucket{job="frontend_service"}[5m])) by (le)
           ) > 0.5
         for: 3m
@@ -50,9 +57,35 @@ groups:
           service: frontend
           signal: latency
         annotations:
-          summary: "High latency detected on frontend"
+          summary: "Frontend high latency detected (P95)"
           description: |
-            Alert Name: FrontendHighLatency
-            Expression (SLI): P95 latency is {{ $value }}s (threshold: 0.5s)
-            Duration: Alert fires after condition persists for 3 minutes
-            Details: The 95th percentile response time for the frontend has exceeded 0.5s.
+            Frontend P95 latency exceeded 0.5s for 3 minutes.
+            User experience may be degraded.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
+
+
+      # =========================================================
+      # Error Budget (Runbook-defined)
+      # =========================================================
+      - alert: FrontendErrorBudgetBurn
+        expr: |
+          (
+            (
+              sum(rate(http_requests_total{job="frontend_service", status=~"5.."}[5m]))
+              /
+              sum(rate(http_requests_total{job="frontend_service"}[5m]))
+            ) > 0.01
+          )
+          OR
+          (up{job="frontend_service"} == 0)
+        for: 5m
+        labels:
+          severity: critical
+          service: frontend
+          signal: error_budget
+        annotations:
+          summary: "Frontend error budget burn is high (proxy)"
+          description: |
+            Frontend is either down or sustaining 5xx error rate above 1% for 5 minutes.
+            Treat as rapid error budget burn and prioritize reliability actions.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md

@@ -1,0 +1,142 @@
+groups:
+  - name: db_slo_alerts
+    interval: 30s
+    rules:
+
+      # =========================================================
+      # Availability
+      # =========================================================
+      - alert: DatabaseDown
+        expr: up{job="mysql"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: database
+          signal: availability
+        annotations:
+          summary: "Database is unreachable"
+          description: |
+            Database exporter cannot be scraped (up == 0).
+            The database service or its host may be down.
+            This will cause application-level failures.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+
+
+      # =========================================================
+      # Traffic
+      # =========================================================
+      - alert: DatabaseHighConnections
+        expr: |
+          (
+            mysql_global_status_threads_connected
+            /
+            mysql_global_variables_max_connections
+          ) > 0.80
+        for: 3m
+        labels:
+          severity: critical
+          service: database
+          signal: traffic
+        annotations:
+          summary: "Database connections are near the limit"
+          description: |
+            Connected threads exceed 80% of max_connections for 3 minutes.
+            This can lead to connection failures and cascading app errors.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+
+
+      # =========================================================
+      # Latency
+      # (Approach: slow queries proxy via MySQL slow query counters)
+      # =========================================================
+      - alert: DatabaseHighLatency
+        expr: |
+          rate(mysql_global_status_slow_queries[5m]) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+          signal: latency
+        annotations:
+          summary: "Database slow queries detected"
+          description: |
+            MySQL reports slow queries occurring continuously for 2 minutes.
+            This is a proxy signal for elevated query latency and degraded performance.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+
+
+      # =========================================================
+      # Errors
+      # (Proxy via aborted connections / handler rollback / innodb errors)
+      # =========================================================
+      - alert: DatabaseQueryErrors
+        expr: |
+          (
+            rate(mysql_global_status_aborted_connects[5m])
+            + rate(mysql_global_status_aborted_clients[5m])
+          ) > 0
+        for: 2m
+        labels:
+          severity: critical
+          service: database
+          signal: errors
+        annotations:
+          summary: "Database connection/query errors detected"
+          description: |
+            Aborted connections/clients are occurring continuously for 2 minutes.
+            This may indicate auth issues, network instability, resource exhaustion,
+            or application retry storms.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+
+
+      # =========================================================
+      # Error Budget
+      # (If you don't have SLO recording rules, use a practical proxy:
+      #  continuous DB errors OR DB down => budget burn)
+      # =========================================================
+      - alert: DatabaseErrorBudgetBurn
+        expr: |
+          (
+            (
+              rate(mysql_global_status_aborted_connects[5m])
+              + rate(mysql_global_status_aborted_clients[5m])
+            ) > 0
+          )
+          OR
+          (up{job="mysql"} == 0)
+        for: 5m
+        labels:
+          severity: critical
+          service: database
+          signal: error_budget
+        annotations:
+          summary: "Database error budget burn (proxy) is high"
+          description: |
+            Database is experiencing sustained error signals for 5 minutes (or is down).
+            Treat as rapid error budget burn and prioritize reliability actions.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+
+
+      # =========================================================
+      # Saturation
+      # (Common MySQL saturation proxies: InnoDB buffer pool pressure / IO / threads running)
+      # =========================================================
+      - alert: DatabaseHighSaturation
+        expr: |
+          (
+            mysql_global_status_threads_running
+            /
+            mysql_global_variables_max_connections
+          ) > 0.60
+        for: 5m
+        labels:
+          severity: critical
+          service: database
+          signal: saturation
+        annotations:
+          summary: "Database saturation is high (threads running)"
+          description: |
+            Threads running exceed 60% of max_connections for 5 minutes.
+            This indicates the database is struggling to keep up with workload,
+            and latency/errors may follow.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md

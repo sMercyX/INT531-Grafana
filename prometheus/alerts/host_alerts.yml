@@ -2,7 +2,28 @@ groups:
   - name: host_slo_alerts
     interval: 30s
     rules:
-      # ===== High CPU Usage (Saturation) =====
+
+      # =========================================================
+      # Availability
+      # =========================================================
+      - alert: HostDown
+        expr: up{job="node"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: host-system
+          signal: availability
+        annotations:
+          summary: "Host is unreachable"
+          description: |
+            Node exporter is not responding (up == 0).
+            All services on this host may be impacted.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/host-golden-signals.md
+
+
+      # =========================================================
+      # Saturation
+      # =========================================================
       - alert: HighCPUUsage
         expr: |
           100 - (avg(rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
@@ -14,12 +35,11 @@ groups:
         annotations:
           summary: "High CPU usage detected"
           description: |
-            Alert Name: HighCPUUsage
-            Expression (SLI): CPU usage is {{ $value | humanize }}% (threshold: 80%)
-            Duration: Alert fires after condition persists for 5 minutes
-            Details: System CPU utilization is critically high, which may impact application performance.
+            CPU usage exceeded 80% for 5 minutes.
+            This may degrade application performance on this host.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/host-golden-signals.md
 
-      # ===== High Memory Usage (Saturation) =====
+
       - alert: HighMemoryUsage
         expr: |
           (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
@@ -31,12 +51,11 @@ groups:
         annotations:
           summary: "High memory usage detected"
           description: |
-            Alert Name: HighMemoryUsage
-            Expression (SLI): Memory usage is {{ $value | humanize }}% (threshold: 85%)
-            Duration: Alert fires after condition persists for 5 minutes
-            Details: System memory utilization is critically high, which may lead to OOM conditions.
+            Memory usage exceeded 85% for 5 minutes.
+            Risk of OOM kills and service instability.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/host-golden-signals.md
 
-      # ===== Disk Space Warning =====
+
       - alert: DiskSpaceLow
         expr: |
           (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100 > 80
@@ -48,7 +67,6 @@ groups:
         annotations:
           summary: "Disk space running low"
           description: |
-            Alert Name: DiskSpaceLow
-            Expression (SLI): Disk usage is {{ $value | humanize }}% (threshold: 80%)
-            Duration: Alert fires after condition persists for 5 minutes
-            Details: Available disk space is critically low, which may cause service failures if logs or data cannot be written.
+            Root filesystem disk usage exceeded 80% for 5 minutes.
+            Services may fail if logs/data cannot be written.
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/host-golden-signals.md

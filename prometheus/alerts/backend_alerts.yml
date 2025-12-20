@@ -21,7 +21,7 @@ groups:
           description: |
             5xx error rate exceeded SLO threshold (1%).
             This indicates backend service failure or dependency issues.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
 
       # ===== Latency =====
@@ -40,7 +40,7 @@ groups:
           description: |
             P95 backend latency exceeded 500ms.
             User experience may be degraded.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
 
       # ===== Traffic =====
@@ -57,7 +57,7 @@ groups:
           description: |
             Request rate is below normal baseline.
             This may indicate upstream connectivity issues.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md
 
 
       # ===== Availability =====
@@ -73,4 +73,4 @@ groups:
           description: |
             Backend service is not responding to health checks.
             Immediate action is required.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/backend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/backend.md

@@ -49,7 +49,8 @@ services:
     ports:
       - "9093:9093"
     volumes:
-      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./prometheus/alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+      - ./prometheus/alertmanager/templates:/etc/alertmanager/templates
       - alertmanager_data:/alertmanager
     command:
       - '--config.file=/etc/alertmanager/alertmanager.yml'

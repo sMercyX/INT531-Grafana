@@ -1,0 +1,31 @@
+{{ define "discord.title" }}
+🚨 {{ .GroupLabels.severity | toUpper }} Alert: {{ .GroupLabels.alertname }}
+{{ end }}
+
+{{ define "discord.message" }}
+**Service**: {{ .GroupLabels.service }}
+**Severity**: {{ .GroupLabels.severity }}
+**Status**: {{ .Status }}
+
+{{ range .Alerts }}
+---
+**Alert Details:**
+{{ .Annotations.description }}
+
+{{ if .Annotations.runbook_url }}
+📖 **Runbook**: [Link]({{ .Annotations.runbook_url }})
+{{ end }}
+
+**Fired at**: {{ .StartsAt.Format "2006-01-02 15:04:05" }}
+{{ if .EndsAt }}**Resolved at**: {{ .EndsAt.Format "2006-01-02 15:04:05" }}{{ end }}
+{{ end }}
+
+**Summary:**
+{{ range .Alerts }}
+- {{ .Annotations.summary }}
+{{ end }}
+
+{{ if eq .GroupLabels.severity "critical" }}
+@infrastructure
+{{ end }}
+{{ end }}

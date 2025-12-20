@@ -17,7 +17,7 @@ groups:
           description: |
             Frontend service is not responding to health checks (up == 0).
             Users may be unable to access the application.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/frontend.md
 
 
       # =========================================================
@@ -40,7 +40,7 @@ groups:
           description: |
             Frontend 5xx error rate exceeded SLO threshold (1%) for 2 minutes.
             This may be caused by backend API failures or a broken frontend deployment.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/frontend.md
 
 
       # =========================================================
@@ -61,7 +61,7 @@ groups:
           description: |
             Frontend P95 latency exceeded 0.5s for 3 minutes.
             User experience may be degraded.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/frontend.md
 
 
       # =========================================================

@@ -7,7 +7,7 @@ groups:
       # Availability
       # =========================================================
       - alert: DatabaseDown
-        expr: up{job="mysql"} == 0
+        expr: up{job="postgresql_be"} == 0
         for: 1m
         labels:
           severity: critical
@@ -103,7 +103,7 @@ groups:
             ) > 0
           )
           OR
-          (up{job="mysql"} == 0)
+          (up{job="postgresql_be"} == 0)
         for: 5m
         labels:
           severity: critical
@@ -139,4 +139,4 @@ groups:
             Threads running exceed 60% of max_connections for 5 minutes.
             This indicates the database is struggling to keep up with workload,
             and latency/errors may follow.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/database-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/database.md

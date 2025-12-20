@@ -88,4 +88,4 @@ groups:
           description: |
             Frontend is either down or sustaining 5xx error rate above 1% for 5 minutes.
             Treat as rapid error budget burn and prioritize reliability actions.
-          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/runbooks/frontend-golden-signals.md
+          runbook_url: https://github.com/sMercyX/INT531-Grafana/blob/main/prometheus/runbooks/frontend.md

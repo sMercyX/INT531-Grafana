@@ -1,0 +1,53 @@
+groups:
+  - name: slo_recording_rules
+    interval: 30s
+    rules:
+      # =========================================================
+      # 1. Normalize Request Rates (Total)
+      # =========================================================
+      - record: job:slo_request_total:rate5m
+        expr: sum(rate(ktor_http_server_requests_seconds_count[5m])) by (service, job)
+        labels:
+          service: backend
+
+      - record: job:slo_request_total:rate5m
+        expr: sum(rate(http_requests_total[5m])) by (service, job)
+        labels:
+          service: frontend
+
+      # =========================================================
+      # 2. Normalize Error Rates (5xx)
+      # =========================================================
+      - record: job:slo_request_errors:rate5m
+        expr: sum(rate(ktor_http_server_requests_seconds_count{status=~"5.."}[5m])) by (service, job)
+        labels:
+          service: backend
+
+      - record: job:slo_request_errors:rate5m
+        expr: sum(rate(http_requests_total{status=~"5.."}[5m])) by (service, job)
+        labels:
+          service: frontend
+
+      # =========================================================
+      # 3. Calculate Availability Ratio (1 - (Errors / Total))
+      # =========================================================
+      - record: job:slo_availability:ratio
+        expr: |
+          1 - (
+            job:slo_request_errors:rate5m
+            /
+            job:slo_request_total:rate5m
+          )
+
+      # =========================================================
+      # 4. Normalize Latency (P95)
+      # =========================================================
+      - record: job:slo_latency_p95:seconds
+        expr: histogram_quantile(0.95, sum(rate(ktor_http_server_requests_seconds_bucket[5m])) by (le, service, job))
+        labels:
+          service: backend
+
+      - record: job:slo_latency_p95:seconds
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le, service, job))
+        labels:
+          service: frontend

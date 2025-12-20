@@ -1,0 +1,173 @@
+{
+  "uid": "frontend-service",
+  "title": "Frontend Dashboard",
+  "tags": ["int531", "frontend", "prometheus"],
+  "timezone": "browser",
+  "schemaVersion": 38,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-30m", "to": "now" },
+  "templating": {
+    "list": [
+      {
+        "name": "datasource",
+        "type": "datasource",
+        "label": "Prometheus",
+        "query": "prometheus",
+        "current": { "text": "Prometheus", "value": "Prometheus" }
+      },
+      {
+        "name": "job",
+        "type": "constant",
+        "label": "Job",
+        "query": "frontend_service",
+        "current": { "text": "frontend_service", "value": "frontend_service" }
+      },
+      {
+        "name": "instance",
+        "type": "query",
+        "label": "Instance",
+        "datasource": { "type": "prometheus", "uid": "${datasource}" },
+        "query": "label_values(up{job=\"$job\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "multi": true,
+        "includeAll": true,
+        "allValue": ".*",
+        "current": { "text": "All", "value": ".*" }
+      },
+      {
+        "name": "rate_interval",
+        "type": "interval",
+        "label": "Rate interval",
+        "query": "30s,1m,2m,5m,10m",
+        "current": { "text": "1m", "value": "1m" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Frontend UP",
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "min(up{job=\"$job\", instance=~\"$instance\"})",
+          "legendFormat": "up"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Request rate (RPS)",
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
+          "legendFormat": "rps"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "5xx error rate (RPS)",
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval]))",
+          "legendFormat": "5xx rps"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+    {
+      "type": "stat",
+      "title": "Error % (5xx / total)",
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "100 * (sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval])) / clamp_min(sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval])), 1e-9))",
+          "legendFormat": "error %"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "percent", "decimals": 2 } },
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Requests per second by status",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "sum by (status) (rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
+          "legendFormat": "{{status}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "P95 latency (seconds)",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"$job\", instance=~\"$instance\"}[$rate_interval])))",
+          "legendFormat": "p95"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "s", "decimals": 3 } }
+    },
+
+    {
+      "type": "timeseries",
+      "title": "Process CPU (if available)",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 7 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "rate(process_cpu_seconds_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval])",
+          "legendFormat": "cpu/sec"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Process memory (RSS) (if available)",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 7 },
+      "datasource": { "type": "prometheus", "uid": "${datasource}" },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "process_resident_memory_bytes{job=\"$job\", instance=~\"$instance\"}",
+          "legendFormat": "rss"
+        }
+      ],
+      "fieldConfig": { "defaults": { "unit": "bytes" } }
+    },
+
+    {
+      "type": "text",
+      "title": "If NO DATA: your frontend metrics may use different names",
+      "gridPos": { "x": 0, "y": 19, "w": 24, "h": 5 },
+      "options": {
+        "mode": "markdown",
+        "content": "This dashboard expects common HTTP metrics:\n\n- `http_requests_total` (labels: `status`)\n- `http_request_duration_seconds_bucket`\n\nIf your frontend exporter uses different names (e.g. `http_server_requests_seconds_*`, `nginx_http_requests_total`, etc.), update the PromQL.\n\nQuick check in Prometheus:\n- `label_values({job=\"frontend_service\"}, __name__)`"
+      }
+    }
+  ]
+}

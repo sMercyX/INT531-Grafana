@@ -29,10 +29,19 @@ scrape_configs:
           - /etc/prometheus/targets/backend_service.json
         refresh_interval: 5s
 
-  - job_name: postgresql
-    static_configs:
-      - targets:
-          - x-postgresql-exporter:9104
+  - job_name: frontend_service
+    metrics_path: /metrics
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/frontend_service.json
+        refresh_interval: 5s
+
+  - job_name: postgresql_be
+    metrics_path: /metrics
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/postgresql_be.json
+        refresh_interval: 5s
 
   - job_name: node_exporter
     file_sd_configs:

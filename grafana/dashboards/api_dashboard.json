@@ -1,6 +1,6 @@
 {
   "uid": "api-backend-service",
-  "title": "API / Backend Service",
+  "title": "API / Backend Dashboard",
   "tags": ["int531", "backend", "prometheus"],
   "timezone": "browser",
   "schemaVersion": 38,

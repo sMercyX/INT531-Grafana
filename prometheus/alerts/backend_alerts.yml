@@ -7,9 +7,9 @@ groups:
       - alert: HighErrorRate
         expr: |
           (
-            sum(rate(ktor_http_server_requests_seconds_count{status=~"5.."}[5m]))
+            sum(rate(app_http_requests_total{job="backend_service", status=~"5.."}[5m]))
             /
-            sum(rate(ktor_http_server_requests_seconds_count{job="backend_service"}[5m]))
+            sum(rate(app_http_requests_total{job="backend_service"}[5m]))
           ) > 0.01
         for: 2m
         labels:
@@ -30,9 +30,9 @@ groups:
           histogram_quantile(
             0.95,
             sum by (le) (
-              rate(ktor_http_server_requests_seconds_bucket{job="backend_service"}[1m])
+              rate(app_http_request_duration_seconds_bucket{job="backend_service"}[1m])
             )
-          ) > 0.05
+          ) > 0.5
         for: 30s
         labels:
           severity: warning
@@ -49,7 +49,7 @@ groups:
       # ===== Traffic =====
       - alert: LowTraffic
         expr: |
-          sum(rate(ktor_http_server_requests_seconds_count{job="backend_service"}[5m])) < 0.01
+          sum(rate(app_http_requests_total{job="backend_service"}[5m])) < 0.01
         for: 10m
         labels:
           severity: info

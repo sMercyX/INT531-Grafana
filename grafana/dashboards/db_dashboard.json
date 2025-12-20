@@ -26,15 +26,15 @@
       {
         "name": "instance",
         "type": "query",
-        "label": "Instance",
+        "label": "Host",
         "datasource": { "type": "prometheus", "uid": "${datasource}" },
         "query": "label_values(up{job=\"$job\"}, instance)",
         "refresh": 1,
         "sort": 1,
-        "multi": true,
-        "includeAll": true,
-        "allValue": ".*",
-        "current": { "text": "All", "value": ".*" }
+        "multi": false,
+        "includeAll": false,
+        "allValue": null,
+        "current": {}
       },
       {
         "name": "db",

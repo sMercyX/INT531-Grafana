@@ -29,16 +29,10 @@
   "liveNow": false,
   "panels": [
     {
-      "gridPos": { "x": 0, "y": 0, "w": 24, "h": 1 },
-      "id": 1,
-      "title": "Golden Signals: Saturation & Traffic",
-      "type": "row"
-    },
-    {
       "title": "CPU Saturation",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 0, "y": 1, "w": 6, "h": 4 },
+      "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\", instance=\"$instance\"}[5m])) * 100)",
@@ -63,7 +57,7 @@
       "title": "Memory Saturation",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 6, "y": 1, "w": 6, "h": 4 },
+      "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "(1 - (node_memory_MemAvailable_bytes{instance=\"$instance\"} / node_memory_MemTotal_bytes{instance=\"$instance\"})) * 100",
@@ -88,7 +82,7 @@
       "title": "Disk Saturation (Root)",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 12, "y": 1, "w": 6, "h": 4 },
+      "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "100 - ((node_filesystem_avail_bytes{mountpoint=\"/\", instance=\"$instance\"} * 100) / node_filesystem_size_bytes{mountpoint=\"/\", instance=\"$instance\"})",
@@ -113,7 +107,7 @@
       "title": "Network Traffic (Total)",
       "type": "stat",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 18, "y": 1, "w": 6, "h": 4 },
+      "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 },
       "targets": [
         {
           "expr": "sum(rate(node_network_receive_bytes_total{instance=\"$instance\"}[5m])) + sum(rate(node_network_transmit_bytes_total{instance=\"$instance\"}[5m]))",
@@ -128,16 +122,10 @@
       }
     },
     {
-      "gridPos": { "x": 0, "y": 5, "w": 24, "h": 1 },
-      "id": 2,
-      "title": "Resource Trends",
-      "type": "row"
-    },
-    {
       "title": "CPU Usage Trend",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "100 - (avg(rate(node_cpu_seconds_total{mode=\"idle\", instance=\"$instance\"}[5m])) * 100)",
@@ -155,7 +143,7 @@
       "title": "Memory Usage Trend",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "(1 - (node_memory_MemAvailable_bytes{instance=\"$instance\"} / node_memory_MemTotal_bytes{instance=\"$instance\"})) * 100",
@@ -170,16 +158,10 @@
       }
     },
     {
-      "gridPos": { "x": 0, "y": 14, "w": 24, "h": 1 },
-      "id": 3,
-      "title": "Network & Disk I/O",
-      "type": "row"
-    },
-    {
       "title": "Network Traffic (In/Out)",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 0, "y": 15, "w": 12, "h": 8 },
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "rate(node_network_receive_bytes_total{instance=\"$instance\"}[5m])",
@@ -201,7 +183,7 @@
       "title": "Disk I/O Time",
       "type": "timeseries",
       "datasource": { "type": "prometheus", "uid": "prometheus" },
-      "gridPos": { "x": 12, "y": 15, "w": 12, "h": 8 },
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
       "targets": [
         {
           "expr": "rate(node_disk_io_time_seconds_total{instance=\"$instance\"}[5m])",
@@ -225,7 +207,7 @@
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "definition": "label_values(node_uname_info, instance)",
+            "definition": "label_values(up{job=\"node_exporter\"}, instance)",
             "hide": 0,
             "includeAll": false,
             "label": "Host",
@@ -233,7 +215,7 @@
             "name": "instance",
             "options": [],
             "query": {
-              "query": "label_values(node_uname_info, instance)",
+              "query": "label_values(up{job=\"node_exporter\"}, instance)",
               "refId": "StandardVariableQuery"
             },
             "refresh": 1,

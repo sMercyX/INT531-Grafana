@@ -13,113 +13,192 @@
 
 ---
 
-## Availability
+## 1. Availability
 
-### Alert: DatabaseDown
+### Alert Name & Description
+**Alert:** `DatabaseDown`  
+**Description:** Database exporter is unreachable (`up == 0`), indicating database or host failure.
 
-**Severity:** Critical  
-**Meaning:** Database exporter is unreachable (`up == 0`).
+### Symptoms
+- Application cannot connect to database
+- No database metrics available
+- Increased application errors
 
-#### Immediate Checks
-- Check Prometheus Targets
-- Verify database process
-- Check host availability
-- Validate network and credentials
-
-#### Diagnosis
+### Possible Causes
 - Database crash
 - Host down
 - Disk full
-- Network misconfiguration
+- Network or credential misconfiguration
 
-#### Mitigation
-- Restart database
+### Troubleshooting Steps
+1. Check Prometheus targets page
+2. Verify database process is running
+3. Confirm host availability
+4. Validate network connectivity and credentials
+
+### Mitigation / Resolution Steps
+- Restart database service
 - Restart host if required
 - Free disk space
 
-#### Escalation
-- Page database on-call immediately
+### Escalation Path
+- Database On-call (Immediate)
+
+### Rollback Instructions
+- Restore database from backup if necessary
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Traffic
+## 2. Traffic
 
-### Alert: DatabaseHighConnections
+### Alert Name & Description
+**Alert:** `DatabaseHighConnections`  
+**Description:** Active database connections are near the configured limit.
 
-**Severity:** Critical  
-**Meaning:** Active connections are near limit.
+### Symptoms
+- New connections rejected
+- Increased query latency
+- Application connection errors
 
-#### Diagnosis
+### Possible Causes
 - Connection leaks
 - Retry storms
-- Pool misconfiguration
+- Connection pool misconfiguration
 
-#### Mitigation
-- Restart offending apps
+### Troubleshooting Steps
+1. Check active connection metrics
+2. Identify top connection sources
+3. Review application connection pool settings
+
+### Mitigation / Resolution Steps
+- Restart offending applications
 - Increase max connections temporarily
 
+### Escalation Path
+- Backend / Database Team
+
+### Rollback Instructions
+- Roll back recent application changes causing connection surge
+
+### Post-mortem Link
+- TBD / To be documented
+
 ---
 
-## Latency
+## 3. Latency
 
-### Alert: DatabaseHighLatency
+### Alert Name & Description
+**Alert:** `DatabaseHighLatency`  
+**Description:** Database query latency exceeds acceptable thresholds.
 
-**Severity:** Critical  
-**Meaning:** Query latency exceeds acceptable limits.
+### Symptoms
+- Slow API responses
+- Increased request timeouts
+- High query execution times
 
-#### Diagnosis
+### Possible Causes
 - Missing indexes
 - Lock contention
-- Disk I/O bottleneck
+- Disk I/O bottlenecks
 
-#### Mitigation
+### Troubleshooting Steps
+1. Identify slow or long-running queries
+2. Check lock and I/O metrics
+3. Review recent schema changes
+
+### Mitigation / Resolution Steps
 - Kill long-running queries
-- Scale resources
-- Optimize queries post-incident
+- Scale database resources
+- Optimize queries after incident
+
+### Escalation Path
+- Database Team
+
+### Rollback Instructions
+- Roll back schema or migration changes
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Errors
+## 4. Errors
 
-### Alert: DatabaseQueryErrors
+### Alert Name & Description
+**Alert:** `DatabaseQueryErrors`  
+**Description:** Database query failures detected.
 
-**Severity:** Critical  
-**Meaning:** Query failures detected.
+### Symptoms
+- Failed queries
+- Application errors
+- Permission or schema errors
 
-#### Mitigation
+### Possible Causes
+- Invalid schema changes
+- Permission misconfiguration
+- Corrupt data
+
+### Mitigation / Resolution Steps
 - Roll back schema changes
 - Fix permissions
-- Restart database if needed
+- Restart database if required
+
+### Escalation Path
+- Database Team
+
+### Rollback Instructions
+- Restore previous schema or backup
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Error Budget
+## 5. Error Budget
 
-### Alert: DatabaseErrorBudgetBurn
+### Alert Name & Description
+**Alert:** `DatabaseErrorBudgetBurn`  
+**Description:** Database SLO is at risk due to rapid error budget consumption.
 
-**Severity:** Critical  
-**Meaning:** Database SLO at risk.
-
-#### Mitigation
+### Mitigation / Resolution Steps
 - Freeze deployments
-- Reduce load
+- Reduce database load
+
+### Escalation Path
+- SRE / Engineering Lead
+
+### Rollback Instructions
+- Roll back recent changes contributing to instability
+
+### Post-mortem Link
+- TBD / To be documented
 
 ---
 
-## Saturation
+## 6. Saturation
 
-### Alert: DatabaseHighSaturation
+### Alert Name & Description
+**Alert:** `DatabaseHighSaturation`  
+**Description:** CPU, memory, or disk I/O saturation detected.
 
-**Severity:** Critical  
-**Meaning:** CPU / memory / disk I/O saturation.
-
-#### Mitigation
+### Mitigation / Resolution Steps
 - Scale vertically
 - Throttle workloads
 
+### Escalation Path
+- Database / Infrastructure Team
+
+### Rollback Instructions
+- Revert recent load-increasing changes
+
+### Post-mortem Link
+- TBD / To be documented
+
 ---
 
-## General Response Guidelines
-- Treat DB incidents as highest priority
+## 7. General Response Guidelines
+- Treat database incidents as highest priority
 - Communicate early with backend team
-

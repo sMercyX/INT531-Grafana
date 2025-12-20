@@ -71,7 +71,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
+          "expr": "sum(rate(app_http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
           "legendFormat": "rps"
         }
       ],
@@ -85,7 +85,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval]))",
+          "expr": "sum(rate(app_http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval]))",
           "legendFormat": "5xx rps"
         }
       ],
@@ -99,7 +99,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "100 * (sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval])) / clamp_min(sum(rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval])), 1e-9))",
+          "expr": "100 * (sum(rate(app_http_requests_total{job=\"$job\", instance=~\"$instance\", status=~\"5..\"}[$rate_interval])) / clamp_min(sum(rate(app_http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval])), 1e-9))",
           "legendFormat": "error %"
         }
       ],
@@ -120,7 +120,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (status) (rate(http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
+          "expr": "sum by (status) (rate(app_http_requests_total{job=\"$job\", instance=~\"$instance\"}[$rate_interval]))",
           "legendFormat": "{{status}}"
         }
       ]
@@ -133,26 +133,14 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{job=\"$job\", instance=~\"$instance\"}[$rate_interval])))",
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(app_http_request_duration_seconds_bucket{job=\"$job\", instance=~\"$instance\"}[$rate_interval])))",
           "legendFormat": "p95"
         }
       ],
       "fieldConfig": { "defaults": { "unit": "s", "decimals": 3 } }
     },
 
-    {
-      "type": "timeseries",
-      "title": "In-flight requests (if available)",
-      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 7 },
-      "datasource": { "type": "prometheus", "uid": "${datasource}" },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum(http_in_flight_requests{job=\"$job\", instance=~\"$instance\"})",
-          "legendFormat": "in_flight"
-        }
-      ]
-    },
+
     {
       "type": "timeseries",
       "title": "Go routines / GC (if Go metrics exist)",
